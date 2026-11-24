@@ -10,6 +10,12 @@
 - UI redesign, Apple style: sticky nav, hero, shelter stat cards, cat
   cards with temperament pills, and a match card with score bars and
   reasons. Temperament picker added to the match search.
+- Stay risk model retrained on the real Austin Animal Center data
+  (69,309 stays, long stay over 30 days) instead of synthetic records.
+  Logistic regression with balanced class weights, holdout AUC 0.610.
+  Cat color field added for the black-coat feature; source is the
+  intake type. The specified Unit 6 held-out gate still passes:
+  accuracy 0.575 against a 0.550 baseline.
 
 ## v1.0.0
 
