@@ -3,6 +3,7 @@
 Run from the backend folder: uvicorn app.main:app --reload
 """
 import datetime as _dt
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -18,7 +19,17 @@ from app.metrics.dashboard import metrics as compute_metrics
 from app.models import Application, Cat
 from app.reminders import scheduler
 
-app = FastAPI(title="PawMatch")
+@asynccontextmanager
+async def lifespan(app):
+    """Load the sample shelter data when the server starts empty."""
+    if not store.cats:
+        from app.seed import seed_data
+
+        seed_data()
+    yield
+
+
+app = FastAPI(title="PawMatch", lifespan=lifespan)
 app.state.model_offline = False
 
 
