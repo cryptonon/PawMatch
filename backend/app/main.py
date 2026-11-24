@@ -6,6 +6,7 @@ import datetime as _dt
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app import store
@@ -30,6 +31,15 @@ async def lifespan(app):
 
 
 app = FastAPI(title="PawMatch", lifespan=lifespan)
+# The React frontend runs on port 5173 and calls this API on port 8000,
+# so cross-origin requests from the frontend origin must be allowed.
+# Without this, the browser blocks the API calls and the cat list stays empty.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 app.state.model_offline = False
 
 
