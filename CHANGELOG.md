@@ -23,6 +23,10 @@
 - Long-stay watchlist: GET /watchlist lists available cats by
   stay-risk probability, highest first, with the flag at 0.70 and a
   plain-language reason. Watchlist section added to the frontend.
+- Capacity alerts (risk R-05): the dashboard now returns
+  capacity_percent and an alert at or over 90 percent full, with
+  capacity 8 places, the seed shelter size. The alert shows in the
+  frontend stats area when present.
 
 ## v1.0.0
 

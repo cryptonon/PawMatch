@@ -20,6 +20,8 @@ type Dashboard = {
   average_stay_days: number;
   adoption_rate: number;
   longest_waiting: Cat[];
+  capacity_percent: number;
+  alert: string | null;
 };
 
 type WatchEntry = {
@@ -124,6 +126,12 @@ export default function App() {
           </p>
           <a className="hero-cta" href="#match">Find your match</a>
         </section>
+
+        {dashboard && dashboard.alert && (
+          <p className="notice" role="alert" style={{ textAlign: "center", fontSize: 15 }}>
+            {dashboard.alert}
+          </p>
+        )}
 
         {dashboard && (
           <section className="stats" id="shelter" aria-label="Shelter numbers">

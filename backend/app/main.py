@@ -311,6 +311,8 @@ def dashboard():
         "average_stay_days": result.average_stay_days,
         "adoption_rate": result.adoption_rate,
         "longest_waiting": [_cat_dict(c) for c in result.longest_waiting],
+        "capacity_percent": result.capacity_percent,
+        "alert": result.alert,
     }
 
 
