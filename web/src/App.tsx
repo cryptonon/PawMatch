@@ -37,6 +37,31 @@ export default function App() {
   const [temperament, setTemperament] = useState("calm");
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState("");
+  const [bioCatId, setBioCatId] = useState("");
+  const [bioNotes, setBioNotes] = useState("");
+  const [bioText, setBioText] = useState("");
+  const [bioState, setBioState] = useState("");
+  const [bioError, setBioError] = useState("");
+
+  function bioAction(action: string) {
+    if (!bioCatId) return;
+    setBioError("");
+    const url = `${API}/cats/${bioCatId}/bio/${action}`;
+    const options: RequestInit =
+      action === "draft"
+        ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ notes: bioNotes || null }) }
+        : { method: "POST" };
+    fetch(url, options)
+      .then((r) => {
+        if (!r.ok) throw new Error("That step is not allowed for this bio yet.");
+        return r.json();
+      })
+      .then((body) => {
+        setBioText(body.text);
+        setBioState(body.state);
+      })
+      .catch((e) => setBioError(e.message));
+  }
 
   useEffect(() => {
     fetch(`${API}/cats`)
@@ -71,6 +96,7 @@ export default function App() {
           <span className="nav-brand">PawMatch</span>
           <a href="#cats">Cats</a>
           <a href="#match">Find a match</a>
+          <a href="#bios">Bios</a>
           <a href="#shelter">Shelter</a>
           <a className="nav-cta" href="#match">Find a match</a>
         </div>
@@ -188,6 +214,45 @@ export default function App() {
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+
+        <section id="bios">
+          <h2 className="section-title">Adoption bios</h2>
+          <p className="section-sub">
+            Draft a bio from the cat profile and staff notes. Staff approve
+            it before it can be published. A draft can never publish.
+          </p>
+          <div className="match-card">
+            <div className="match-controls">
+              <select
+                value={bioCatId}
+                onChange={(e) => setBioCatId(e.target.value)}
+                aria-label="Cat for the bio"
+              >
+                <option value="">Choose a cat</option>
+                {cats.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <button className="btn" onClick={() => bioAction("draft")}>Draft bio</button>
+              <button className="btn" onClick={() => bioAction("approve")}>Approve</button>
+              <button className="btn" onClick={() => bioAction("publish")}>Publish</button>
+            </div>
+            <textarea
+              value={bioNotes}
+              onChange={(e) => setBioNotes(e.target.value)}
+              placeholder="Staff notes for the bio, optional"
+              rows={2}
+              style={{ width: "100%", font: "inherit", fontSize: 14, padding: 10, borderRadius: 12, border: "1px solid #d2d2d7", marginTop: 8 }}
+            />
+            {bioError && <p className="notice">{bioError}</p>}
+            {bioText && (
+              <>
+                <p style={{ fontSize: 15, lineHeight: 1.6 }}>{bioText}</p>
+                <span className="pill">{bioState}</span>
+              </>
+            )}
           </div>
         </section>
 
