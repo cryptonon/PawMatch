@@ -22,6 +22,13 @@ type Dashboard = {
   longest_waiting: Cat[];
 };
 
+type WatchEntry = {
+  cat: Cat;
+  probability: number;
+  flagged: boolean;
+  reason: string;
+};
+
 const API = "http://localhost:8000";
 
 function initials(name: string) {
@@ -37,6 +44,7 @@ export default function App() {
   const [temperament, setTemperament] = useState("calm");
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState("");
+  const [watchlist, setWatchlist] = useState<WatchEntry[]>([]);
   const [bioCatId, setBioCatId] = useState("");
   const [bioNotes, setBioNotes] = useState("");
   const [bioText, setBioText] = useState("");
@@ -72,6 +80,10 @@ export default function App() {
       .then((r) => r.json())
       .then(setDashboard)
       .catch(() => {});
+    fetch(`${API}/watchlist`)
+      .then((r) => r.json())
+      .then(setWatchlist)
+      .catch(() => {});
   }, []);
 
   function search() {
@@ -96,6 +108,7 @@ export default function App() {
           <span className="nav-brand">PawMatch</span>
           <a href="#cats">Cats</a>
           <a href="#match">Find a match</a>
+          <a href="#watchlist">Watchlist</a>
           <a href="#bios">Bios</a>
           <a href="#shelter">Shelter</a>
           <a className="nav-cta" href="#match">Find a match</a>
@@ -210,6 +223,33 @@ export default function App() {
                     <div className="score-bar">
                       <div style={{ width: `${entry.score}%` }} />
                     </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section id="watchlist">
+          <h2 className="section-title">Long-stay watchlist</h2>
+          <p className="section-sub">
+            Available cats most likely to wait too long, highest risk first.
+            Flagged cats need staff attention now.
+          </p>
+          <div className="match-card">
+            <ol className="ranked">
+              {watchlist.map((entry) => (
+                <li key={entry.cat.id}>
+                  <div className="rank-body">
+                    <div className="rank-name">
+                      {entry.cat.name}{" "}
+                      {entry.flagged && <span className="pill good">Needs attention</span>}
+                    </div>
+                    <div className="rank-reason">{entry.reason}</div>
+                  </div>
+                  <div className="score">
+                    <div className="score-num">{Math.round(entry.probability * 100)}%</div>
+                    <div className="score-label">long-stay chance</div>
                   </div>
                 </li>
               ))}
