@@ -11,6 +11,8 @@ from pydantic import BaseModel
 
 from app import store
 from app.adoptions.workflow import WorkflowError, close as close_application, move as move_application
+from app.bios import drafting as bio_drafting
+from app.bios.drafting import BioError
 from app.adopters.schemas import AdopterProfile
 from app.adopters.search import search as filtered_search
 from app.care.timeline import ValidationError, add_entry, timeline
@@ -72,6 +74,10 @@ class ReminderIn(BaseModel):
 
 class ModelOfflineIn(BaseModel):
     offline: bool
+
+
+class BioIn(BaseModel):
+    notes: str | None = None
 
 
 def _cat_or_404(cat_id):
@@ -246,6 +252,43 @@ def match_cats(has_dog: bool = False, has_children: bool = False,
         {"cat": _cat_dict(entry.cat), "score": entry.score, "reason": entry.reason}
         for entry in ranked
     ]}
+
+
+def _bio_dict(bio):
+    return {"cat_id": bio.cat_id, "text": bio.text, "state": bio.state}
+
+
+@app.post("/cats/{cat_id}/bio/draft", status_code=201)
+def draft_bio_endpoint(cat_id: int, data: BioIn):
+    cat = _cat_or_404(cat_id)
+    return _bio_dict(bio_drafting.create_draft(cat, notes=data.notes))
+
+
+@app.get("/cats/{cat_id}/bio")
+def get_bio_endpoint(cat_id: int):
+    _cat_or_404(cat_id)
+    bio = bio_drafting.get_bio(cat_id)
+    if bio is None:
+        raise HTTPException(status_code=404, detail="no bio draft for this cat")
+    return _bio_dict(bio)
+
+
+@app.post("/cats/{cat_id}/bio/approve")
+def approve_bio_endpoint(cat_id: int):
+    _cat_or_404(cat_id)
+    try:
+        return _bio_dict(bio_drafting.approve(cat_id))
+    except BioError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/cats/{cat_id}/bio/publish")
+def publish_bio_endpoint(cat_id: int):
+    _cat_or_404(cat_id)
+    try:
+        return _bio_dict(bio_drafting.publish(cat_id))
+    except BioError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @app.get("/dashboard")

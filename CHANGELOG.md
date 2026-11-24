@@ -16,6 +16,10 @@
   Cat color field added for the black-coat feature; source is the
   intake type. The specified Unit 6 held-out gate still passes:
   accuracy 0.575 against a 0.550 baseline.
+- AI-drafted adoption bios: rule-based drafts from the cat profile and
+  staff notes (no external AI API in this project), with a draft,
+  approve, publish workflow. Only an approved bio can publish;
+  publishing a draft is rejected. Bios section added to the frontend.
 
 ## v1.0.0
 
