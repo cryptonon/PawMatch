@@ -14,7 +14,12 @@
   TC5 needs Version 2 matching, TC9 needs the model fallback; both are
   covered in v2.0.0.
 
-## v2.0.0 (to be tagged when the Version 2 system test passes)
+## v2.0.0
 
 - Compatibility scoring with plain language reasons, and stay risk
   prediction with the 0.70 flag threshold.
+- Stay risk model: logistic regression trained on 400 synthetic shelter
+  records (features age, shy, senior), saved as model.pkl.
+- Full suite: 41 unit tests and 9 system tests passing. Held-out
+  accuracy 0.625 against a 0.550 majority baseline (40 cats).
+- Total line coverage 90 percent, meeting the project gate.
