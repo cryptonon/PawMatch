@@ -4,6 +4,12 @@
 
 - Project scaffold: shared models, error types, pinned requirements,
   environment example, README.
+- CORS fix: allow the React frontend origin (localhost:5173 and
+  127.0.0.1:5173) to call the API, so the cat list loads in a real
+  browser instead of coming up empty.
+- UI redesign, Apple style: sticky nav, hero, shelter stat cards, cat
+  cards with temperament pills, and a match card with score bars and
+  reasons. Temperament picker added to the match search.
 
 ## v1.0.0
 

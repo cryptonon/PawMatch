@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./index.css";
 
 type Cat = {
   id: number;
@@ -14,70 +15,186 @@ type Cat = {
 
 type Ranked = { cat: Cat; score: number; reason: string };
 
+type Dashboard = {
+  cats_in_shelter: number;
+  average_stay_days: number;
+  adoption_rate: number;
+  longest_waiting: Cat[];
+};
+
 const API = "http://localhost:8000";
+
+function initials(name: string) {
+  return name.slice(0, 1).toUpperCase();
+}
 
 export default function App() {
   const [cats, setCats] = useState<Cat[]>([]);
+  const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [ranked, setRanked] = useState<Ranked[]>([]);
   const [hasDog, setHasDog] = useState(false);
   const [hasChildren, setHasChildren] = useState(false);
+  const [temperament, setTemperament] = useState("calm");
+  const [searched, setSearched] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetch(`${API}/cats`)
       .then((r) => r.json())
-      .then(setCats)
+      .then((all: Cat[]) => setCats(all.filter((c) => c.status === "available")))
       .catch(() => setError("Could not reach the PawMatch API on port 8000."));
+    fetch(`${API}/dashboard`)
+      .then((r) => r.json())
+      .then(setDashboard)
+      .catch(() => {});
   }, []);
 
   function search() {
     const params = new URLSearchParams({
       has_dog: String(hasDog),
       has_children: String(hasChildren),
-      temperament: "calm",
+      temperament,
     });
     fetch(`${API}/match?${params}`)
       .then((r) => r.json())
-      .then((body) => setRanked(body.ranked ?? []))
+      .then((body) => {
+        setRanked(body.ranked ?? []);
+        setSearched(true);
+      })
       .catch(() => setError("Search failed. Is the backend running?"));
   }
 
   return (
-    <main style={{ fontFamily: "system-ui", maxWidth: 640, margin: "0 auto", padding: 24 }}>
-      <h1>PawMatch</h1>
-      <p>A smart cat adoption tracker for shelters.</p>
-      {error && <p>{error}</p>}
-      <h2>Cats at the shelter</h2>
-      <ul>
-        {cats
-          .filter((c) => c.status === "available")
-          .map((c) => (
-            <li key={c.id}>
-              {c.name}, {c.age} years, {c.breed}, arrived {c.arrival_date} ({c.temperament})
-            </li>
-          ))}
-      </ul>
-      <h2>Find a match</h2>
-      <label>
-        <input type="checkbox" checked={hasDog} onChange={(e) => setHasDog(e.target.checked)} />
-        Dog at home
-      </label>{" "}
-      <label>
-        <input
-          type="checkbox"
-          checked={hasChildren}
-          onChange={(e) => setHasChildren(e.target.checked)}
-        />
-        Children at home
-      </label>{" "}
-      <button onClick={search}>Search</button>
-      <ol>
-        {ranked.map((entry) => (
-          <li key={entry.cat.id}>
-            {entry.cat.name}: {entry.score}/100. {entry.reason}
-          </li>
-        ))}
-      </ol>
-    </main>
+    <>
+      <header className="nav">
+        <div className="nav-inner">
+          <span className="nav-brand">PawMatch</span>
+          <a href="#cats">Cats</a>
+          <a href="#match">Find a match</a>
+          <a href="#shelter">Shelter</a>
+          <a className="nav-cta" href="#match">Find a match</a>
+        </div>
+      </header>
+
+      <main className="page">
+        <section className="hero">
+          <h1>Find the cat that fits your home.</h1>
+          <p>
+            PawMatch tracks every shelter cat from intake to adoption, then
+            ranks the cats that fit your home, with the reason shown for each one.
+          </p>
+          <a className="hero-cta" href="#match">Find your match</a>
+        </section>
+
+        {dashboard && (
+          <section className="stats" id="shelter" aria-label="Shelter numbers">
+            <div className="stat">
+              <div className="stat-value">{dashboard.cats_in_shelter}</div>
+              <div className="stat-label">Cats at the shelter</div>
+            </div>
+            <div className="stat">
+              <div className="stat-value">{dashboard.average_stay_days} days</div>
+              <div className="stat-label">Average length of stay</div>
+            </div>
+            <div className="stat">
+              <div className="stat-value">
+                {Math.round(dashboard.adoption_rate * 100)}%
+              </div>
+              <div className="stat-label">Adoption rate</div>
+            </div>
+          </section>
+        )}
+
+        {error && <p className="notice">{error}</p>}
+
+        <section id="cats">
+          <h2 className="section-title">Cats at the shelter</h2>
+          <p className="section-sub">
+            {cats.length} available now. The longest waiting cat is{" "}
+            {dashboard?.longest_waiting?.[0]?.name ?? "shown in the dashboard"}.
+          </p>
+          <div className="cat-grid">
+            {cats.map((c) => (
+              <article className="cat-card" key={c.id}>
+                <div className={`avatar ${c.temperament}`}>{initials(c.name)}</div>
+                <h3>{c.name}</h3>
+                <p className="cat-meta">
+                  {c.age} {c.age === 1 ? "year" : "years"} &middot; {c.breed}
+                  <br />
+                  Arrived {c.arrival_date}
+                </p>
+                <span className="pill">{c.temperament}</span>
+                {c.good_with_dogs && <span className="pill good">Good with dogs</span>}
+                {c.good_with_children && (
+                  <span className="pill good">Good with children</span>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="match">
+          <h2 className="section-title">Find a match</h2>
+          <p className="section-sub">
+            Tell us about your home. Every result shows its score and why the cat fits.
+          </p>
+          <div className="match-card">
+            <div className="match-controls">
+              <label className={`toggle ${hasDog ? "on" : ""}`}>
+                <input
+                  type="checkbox"
+                  checked={hasDog}
+                  onChange={(e) => setHasDog(e.target.checked)}
+                />
+                Dog at home
+              </label>
+              <label className={`toggle ${hasChildren ? "on" : ""}`}>
+                <input
+                  type="checkbox"
+                  checked={hasChildren}
+                  onChange={(e) => setHasChildren(e.target.checked)}
+                />
+                Children at home
+              </label>
+              <select
+                value={temperament}
+                onChange={(e) => setTemperament(e.target.value)}
+                aria-label="Preferred temperament"
+              >
+                <option value="calm">Calm temperament</option>
+                <option value="energetic">Energetic temperament</option>
+              </select>
+              <button className="btn" onClick={search}>Search</button>
+            </div>
+
+            {searched && ranked.length === 0 && (
+              <p className="section-sub">No cats match those filters yet.</p>
+            )}
+            <ol className="ranked">
+              {ranked.map((entry, i) => (
+                <li key={entry.cat.id}>
+                  <span className="rank-num">{i + 1}</span>
+                  <div className="rank-body">
+                    <div className="rank-name">{entry.cat.name}</div>
+                    <div className="rank-reason">{entry.reason}</div>
+                  </div>
+                  <div className="score">
+                    <div className="score-num">{entry.score}</div>
+                    <div className="score-label">out of 100</div>
+                    <div className="score-bar">
+                      <div style={{ width: `${entry.score}%` }} />
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <footer className="footer">
+          PawMatch &middot; A smart cat adoption tracker for shelters
+        </footer>
+      </main>
+    </>
   );
 }
