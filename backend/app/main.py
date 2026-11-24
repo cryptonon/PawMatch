@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from app import store
 from app.adoptions.workflow import WorkflowError, close as close_application, move as move_application
+from app.watchlist import watchlist as build_watchlist
 from app.bios import drafting as bio_drafting
 from app.bios.drafting import BioError
 from app.adopters.schemas import AdopterProfile
@@ -289,6 +290,17 @@ def publish_bio_endpoint(cat_id: int):
         return _bio_dict(bio_drafting.publish(cat_id))
     except BioError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/watchlist")
+def get_watchlist():
+    return [
+        {"cat": _cat_dict(entry.cat),
+         "probability": round(entry.probability, 3),
+         "flagged": entry.flagged,
+         "reason": entry.reason}
+        for entry in build_watchlist(store.cats)
+    ]
 
 
 @app.get("/dashboard")
