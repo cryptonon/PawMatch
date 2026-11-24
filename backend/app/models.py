@@ -13,6 +13,7 @@ class Cat:
     name: str
     age: int
     breed: str = "Domestic Shorthair"
+    color: str = ""
     sex: str = "F"
     arrival_date: str = "2026-10-01"
     source: str = "stray"
