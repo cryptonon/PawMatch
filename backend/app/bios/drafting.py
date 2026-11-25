@@ -35,14 +35,15 @@ def draft_bio(cat, notes=None):
     staff_notes = (notes or cat.behavior_notes or "").strip()
     age = int(cat.age or 0)
     if age == 0:
-        age_text = "a young kitten"
+        opening = f"Meet {cat.name}, a young kitten ({cat.breed})."
     elif age == 1:
-        age_text = "1 year old"
+        opening = f"Meet {cat.name}, a 1 year old {cat.breed}."
     elif age >= 10:
-        age_text = f"{age} years old and looking for a calm home"
+        opening = (f"Meet {cat.name}, a {age} year old {cat.breed} "
+                   f"looking for a calm home.")
     else:
-        age_text = f"{age} years old"
-    parts = [f"Meet {cat.name}, {age_text} {cat.breed}."]
+        opening = f"Meet {cat.name}, a {age} year old {cat.breed}."
+    parts = [opening]
     if (cat.temperament or "").lower() == "calm":
         parts.append(f"{cat.name} is a calm cat who likes quiet rooms.")
     elif (cat.temperament or "").lower() == "energetic":

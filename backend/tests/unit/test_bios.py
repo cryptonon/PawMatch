@@ -27,7 +27,7 @@ def test_draft_names_the_cat_and_its_temperament():
     text = draft_bio(cat)
     assert "Pepper" in text
     assert "calm" in text.lower()
-    assert "12 years old" in text
+    assert "12 year old" in text
     assert "good with dogs" in text.lower()
     assert "Calm and shy with visitors" in text
 
