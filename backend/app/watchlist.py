@@ -46,11 +46,16 @@ def watchlist(cats):
         if cat.status != "available":
             continue
         assessment = stay_risk.assess(cat)
+        # Round once, here, so the reason, the flag, and the number the
+        # API returns all describe the same probability. Rounding later
+        # in the API made Miso read 38% in the score and 37% in the
+        # reason for the same 0.3748 probability.
+        probability = round(assessment.probability, 3)
         entries.append(WatchlistEntry(
             cat=cat,
-            probability=assessment.probability,
-            flagged=assessment.flagged,
-            reason=_reason(cat, assessment.probability),
+            probability=probability,
+            flagged=probability >= stay_risk.THRESHOLD,
+            reason=_reason(cat, probability),
         ))
     entries.sort(key=lambda e: e.probability, reverse=True)
     return entries

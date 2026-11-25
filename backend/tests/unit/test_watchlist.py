@@ -51,3 +51,11 @@ def test_flagged_cat_appears_first(monkeypatch, cats):
 def test_no_cat_is_flagged_on_the_seed_data(cats):
     entries = watchlist(cats)
     assert all(e.flagged is False for e in entries)
+
+
+def test_reason_percent_matches_probability(cats):
+    # Regression: Miso read 38% in the score and 37% in the reason,
+    # because the API rounded the probability after the reason was built.
+    entries = watchlist(cats)
+    for entry in entries:
+        assert f"{round(entry.probability * 100)}%" in entry.reason
