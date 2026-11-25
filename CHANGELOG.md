@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Nothing yet.
+
+## v2.1.0
+
 - Project scaffold: shared models, error types, pinned requirements,
   environment example, README.
 - CORS fix: allow the React frontend origin (localhost:5173 and
@@ -27,6 +31,8 @@
   capacity_percent and an alert at or over 90 percent full, with
   capacity 8 places, the seed shelter size. The alert shows in the
   frontend stats area when present.
+- Full suite: 75 tests passing (41 original unit, 16 new unit,
+  9 system TC1 to TC9, 9 new system). Total line coverage 93 percent.
 
 ## v1.0.0
 
